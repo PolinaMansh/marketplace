@@ -1,0 +1,119 @@
+import React, { useState } from "react";
+import { BrowserRouter as Router, Route, Routes, useNavigate } from "react-router-dom";
+import Home from "./pages/Home";
+import Catalog from "./pages/Catalog";
+import ProductPage from "./pages/ProductPage";
+import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import Button from "./components/UI/Button";
+import Input from "./components/UI/Input";
+import Card from "./components/UI/Card";
+import { motion } from "framer-motion";
+
+function App() {
+  const [cart, setCart] = useState([]);
+
+  const addToCart = (product) => {
+    setCart((prevCart) => [...prevCart, product]);
+  };
+
+  const removeFromCart = (productId) => {
+    setCart((prevCart) => prevCart.filter((product) => product.id !== productId));
+  };
+
+  const clearCart = () => {
+    setCart([]);
+  };
+
+  return (
+    <Router>
+      <motion.div 
+        className="bg-gradient-to-b from-peach-200 to-beige-100 min-h-screen text-gray-800 font-sans"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Navbar />
+        <motion.div 
+          className="container mx-auto px-4 py-8"
+          initial={{ y: -10, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/catalog" element={<Catalog addToCart={addToCart} />} />
+            <Route path="/product/:id" element={<ProductPage addToCart={addToCart} />} />
+            <Route path="/cart" element={<Cart cart={cart} removeFromCart={removeFromCart} />} />
+            <Route path="/checkout" element={<Checkout cart={cart} clearCart={clearCart} />} />
+          </Routes>
+        </motion.div>
+        <Footer />
+      </motion.div>
+    </Router>
+  );
+}
+
+export default App;
+
+// Checkout Page Component
+export const Checkout = ({ cart, clearCart }) => {
+  const navigate = useNavigate();
+  const [customerInfo, setCustomerInfo] = useState({ name: "", email: "" });
+
+  const handleChange = (e) => {
+    setCustomerInfo({ ...customerInfo, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    alert(`Спасибо за покупку, ${customerInfo.name}!`);
+    clearCart();
+    navigate("/");
+  };
+
+  return (
+    <motion.div 
+      className="text-center py-8"
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
+      <h1 className="text-3xl font-bold text-peach-600">Оформление заказа</h1>
+      <form className="mt-6 max-w-md mx-auto" onSubmit={handleSubmit}>
+        <Input 
+          type="text" 
+          name="name" 
+          placeholder="Ваше имя" 
+          value={customerInfo.name} 
+          onChange={handleChange} 
+          required
+        />
+        <Input 
+          type="email" 
+          name="email" 
+          placeholder="Ваш Email" 
+          value={customerInfo.email} 
+          onChange={handleChange} 
+          required
+        />
+        <Button type="submit">Подтвердить заказ</Button>
+      </form>
+    </motion.div>
+  );
+};
+
+// UI Components
+export const Button = ({ children, ...props }) => (
+  <button className="bg-peach-500 text-white px-4 py-2 rounded" {...props}>{children}</button>
+);
+
+export const Input = ({ ...props }) => (
+  <input className="w-full p-2 border rounded mb-4" {...props} />
+);
+
+export const Card = ({ children }) => (
+  <div className="border rounded-lg shadow-md p-4 bg-white">{children}</div>
+);
